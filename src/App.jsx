@@ -1,15 +1,19 @@
 import { useState } from 'react';
+import { Routes, Route } from 'react-router-dom';
 import Header from './components/Header';
-import ProductCard from './components/ProductCard';
 import CartSidebar from './components/CartSidebar';
-import { sampleProducts } from './data/products';
+import HomePage from './pages/HomePage';
+import ProductsPage from './pages/ProductsPage';
+import ProductDetailPage from './pages/ProductDetailPage';
+import CartPage from './pages/CartPage';
+import AboutPage from './pages/AboutPage';
+import NotFoundPage from './pages/NotFoundPage';
 
 function App() {
   const [cartItems, setCartItems] = useState([]);
   const [isCartOpen, setIsCartOpen] = useState(false);
 
   const addToCart = (product) => {
-    console.log("🎯 App.addToCart called with:", product);
     setCartItems(prevItems => {
       const existingItem = prevItems.find(item => item.id === product.id);
       
@@ -30,7 +34,6 @@ function App() {
       removeFromCart(productId);
       return;
     }
-
     setCartItems(prevItems =>
       prevItems.map(item =>
         item.id === productId 
@@ -47,31 +50,21 @@ function App() {
   };
 
   const cartCount = cartItems.reduce((total, item) => total + item.quantity, 0);
-
   const openCart = () => setIsCartOpen(true);
   const closeCart = () => setIsCartOpen(false);
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <Header 
-        cartCount={cartCount} 
-        onCartClick={openCart}
-      />
+      <Header cartCount={cartCount} onCartClick={openCart} />
       
-      <main className="max-w-6xl mx-auto px-4 py-8">
-        <h2 className="text-3xl font-bold text-center text-gray-900 mb-8">
-          Featured Products
-        </h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {sampleProducts.map(product => (
-            <ProductCard
-              key={product.id}
-              {...product}
-              onAddToCart={addToCart}
-            />
-          ))}
-        </div>
-      </main>
+      <Routes>
+        <Route path="/" element={<HomePage onAddToCart={addToCart} />} />
+        <Route path="/products" element={<ProductsPage onAddToCart={addToCart} />} />
+        <Route path="/products/:id" element={<ProductDetailPage onAddToCart={addToCart} />} />
+        <Route path="/cart" element={<CartPage cartItems={cartItems} onUpdateQuantity={updateQuantity} onRemoveItem={removeFromCart} />} />
+        <Route path="/about" element={<AboutPage />} />
+        <Route path="*" element={<NotFoundPage />} />
+      </Routes>
 
       <CartSidebar
         isOpen={isCartOpen}
